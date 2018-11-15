@@ -1,0 +1,10 @@
+[package]
+name = "minigrep"
+version = "0.1.0"
+authors = ["charlie <take3812@gmail.com>"]
+
+[[bin]]
+name = "x_server"
+path = "src/bin/server.rs"
+
+[dependencies]
