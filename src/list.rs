@@ -5,7 +5,7 @@ type Node<T> = Option<Arc<Mutex<Box<ListNode<T>>>>>;
 
 pub struct List<T> {
     head: Option<Box<ListNode<T>>>,
-    last: Option<RefCell<Box<ListNode<T>>>>,
+    last: Option<Box<ListNode<T>>>,
     len: u64,
 }
 
@@ -13,7 +13,7 @@ pub struct List<T> {
 pub struct ListNode<T> {
     index: u64,
     val: T,
-    next: Option<Box<T>>,
+    next: Option<Box<ListNode<T>>>,
 }
 
 impl<T> ListNode<T> {
@@ -44,15 +44,16 @@ impl<T> List<T> {
     }
 
     fn insert(&mut self, v: T) {
-        let mut new_node = ListNode::new(self.len + 1, v);
+        let mut new_node = Some(Box::new(ListNode::new(self.len + 1, v)));
         match self.head {
-            Some(mut h) => {
-                new_node.next = self.head.take();
-                self.head = Some(Box::new(new_node));
-            }
+            Some(mut h) => {}
             None => {
+                if let Some(mut l) = self.last {
+                    l.next = new_node;
+                    self.last = new_node;
+                }
                 self.head = Some(Box::new(new_node));
-                self.last = Some(RefCell::new(Arc::new()))
+                self.last = self.head.clone();
             }
         }
     }
