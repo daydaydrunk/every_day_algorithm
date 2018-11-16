@@ -1,8 +1,8 @@
 pub mod unsafes {
-    use std::sync::{Mutex,Arc};
-    use std::thread;
-    use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
     use std::net::IpAddr;
+    use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
+    use std::sync::{Arc, Mutex};
+    use std::thread;
 
     #[derive(Debug)]
     enum ServerAddr {
@@ -10,20 +10,20 @@ pub mod unsafes {
         DomainName(String),
     }
 
-    impl ServerAddr{
+    impl ServerAddr {
         fn listen_addr(self) -> SocketAddr {
             match self {
-                ServerAddr::SocketAddr( s) => s,
+                ServerAddr::SocketAddr(s) => s,
                 _ => panic!("Cannot use domain name as server listen address"),
             }
         }
     }
 
-    pub fn madd(a:u64) -> u64 {
+    pub fn madd(a: u64) -> u64 {
         let mut counter = Arc::new(Mutex::new(a));
         let mut handlers = vec![];
 
-        for _ in 0 .. 10  {
+        for _ in 0..10 {
             let counter = counter.clone();
             let handle = thread::spawn(move || {
                 let mut num = counter.lock().unwrap();
@@ -33,7 +33,7 @@ pub mod unsafes {
             handlers.push(handle);
         }
 
-        for h in handlers{
+        for h in handlers {
             h.join().unwrap();
         }
 
@@ -44,27 +44,27 @@ pub mod unsafes {
 
     struct Context<'s>(&'s str);
 
-    struct Parser<'c, 's:'c> {
-        context:&'c Context<'s>
+    struct Parser<'c, 's: 'c> {
+        context: &'c Context<'s>,
     }
 
-    impl <'c,'s> Parser<'c, 's> {
-        fn parse(&self) -> Result<(),&'s str> {
+    impl<'c, 's> Parser<'c, 's> {
+        fn parse(&self) -> Result<(), &'s str> {
             Err(&self.context.0[1..])
         }
     }
 
-    fn parse_content(context: Context) -> Result<(),&str> {
-        Parser { context: &context}.parse()
+    fn parse_content(context: Context) -> Result<(), &str> {
+        Parser { context: &context }.parse()
     }
 
-    pub fn param(){
+    pub fn param() {
         // let mut a = ServerAddr::SocketAddr(SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127,0,0,1)),8080));
     }
 
-    fn fa(s:&mut String) -> &str{
+    fn fa(s: &mut String) -> &str {
         s.push_str("aaa");
-       s
+        s
     }
 
 }

@@ -1,8 +1,8 @@
-use std::net::TcpListener;
-use std::net::TcpStream;
-use std::io::prelude::*;
 use std::fs::File;
 use std::io;
+use std::io::prelude::*;
+use std::net::TcpListener;
+use std::net::TcpStream;
 
 use pool::ThreadPool;
 
@@ -11,7 +11,7 @@ pub fn listen_addr() {
     let pool = ThreadPool::new(4);
     let mut counter = 0;
 
-    for stream in linstener.incoming(){
+    for stream in linstener.incoming() {
         if counter == 4 {
             println!("Exit! byte");
             break;
@@ -21,14 +21,12 @@ pub fn listen_addr() {
 
         let stream = stream.unwrap();
 
-        pool.execute( || {
-            handle_conn(stream)
-        });
+        pool.execute(|| handle_conn(stream));
     }
 }
 
-fn handle_conn(mut stream: TcpStream){
-    let mut buffer = [0;512];
+fn handle_conn(mut stream: TcpStream) {
+    let mut buffer = [0; 512];
 
     stream.read(&mut buffer).unwrap();
     println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
@@ -37,21 +35,21 @@ fn handle_conn(mut stream: TcpStream){
 
     if buffer.starts_with(get) {
         send_http_response(load_html("views/hello.html"), &mut stream);
-    }else{
+    } else {
         send_http_response(load_html("views/404.html"), &mut stream);
     }
 }
 
-fn send_http_response(content:Result<String,io::Error>, stream:&mut TcpStream) {
-        let response = match content {
-            Ok(content) => content,
-            Err(e) => format!("HTTP/1.1 500 FAIL\r\n\r\n{}",e),
-        };
-        stream.write(response.as_bytes()).unwrap();
-        stream.flush().unwrap();
+fn send_http_response(content: Result<String, io::Error>, stream: &mut TcpStream) {
+    let response = match content {
+        Ok(content) => content,
+        Err(e) => format!("HTTP/1.1 500 FAIL\r\n\r\n{}", e),
+    };
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
 }
 
-fn load_html(file:&str) -> Result<String,io::Error> {
+fn load_html(file: &str) -> Result<String, io::Error> {
     let mut file = File::open(file)?;
     let mut content = String::new();
 
