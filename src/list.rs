@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::collections::LinkedList;
 use std::sync::{Arc, Mutex};
 
 type Node<T> = Option<Arc<Mutex<Box<ListNode<T>>>>>;
@@ -29,9 +30,7 @@ impl<T> ListNode<T> {
 impl<T> Iterator for List<T> {
     type Item = T;
 
-    fn next(&self) -> Option<Self::Item> {
-        self.head
-    }
+    fn next(&mut self) -> Option<Self::Item> {}
 }
 
 impl<T> List<T> {
