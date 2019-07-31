@@ -1,3 +1,5 @@
+extern crate core;
+
 pub mod demo;
 pub mod grep;
 pub mod http;
