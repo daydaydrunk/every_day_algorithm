@@ -2,6 +2,9 @@ use crate::leetcode::code::Solution;
 use std::cmp::max;
 use std::convert::TryInto;
 pub mod code {
+    use std::collections::hash_set::HashSet;
+    use std::ops::Index;
+
     #[derive(Debug)]
     pub struct Solution;
 
@@ -630,7 +633,309 @@ pub mod code {
                 range.push(format!("{}->{}", nums[*l], nums[*r]));
             }
         }
+
+        //leetcode 414
+        pub fn third_max(nums: Vec<i32>) -> i32 {
+            let mut snums = nums.clone();
+            snums.sort();
+            snums.dedup_by(|a, b| a == b);
+            let l = snums.len();
+            match l {
+                0 => 0,
+                _ if l < 3 => snums.pop().unwrap(),
+                _ if l >= 3 => {
+                    snums.reverse();
+                    snums[2]
+                }
+                _ => 0,
+            }
+        }
+
+        // leetcode 448
+        pub fn find_disappeared_numbers(nums: Vec<i32>) -> Vec<i32> {
+            let mut nums = nums;
+            for n in 0..nums.len() {
+                let x = nums[n].abs() - 1;
+                if nums[x as usize] > 0 {
+                    nums[x as usize] *= -1;
+                }
+            }
+
+            let mut rtn = vec![];
+            for (idx, &n) in nums.iter().enumerate() {
+                if n > 0 {
+                    rtn.push((idx + 1) as i32);
+                }
+            }
+            return rtn;
+        }
+
+        //leetcode 485
+        pub fn find_max_consecutive_ones(nums: Vec<i32>) -> i32 {
+            let mut max = 0;
+            let mut count = 0;
+            for i in 0..nums.len() {
+                if nums[i] == 1 {
+                    count += 1;
+                    max = max.max(count);
+                } else {
+                    count = 0;
+                }
+            }
+            max
+        }
+
+        //leetcode 532
+        pub fn find_pairs(nums: Vec<i32>, k: i32) -> i32 {
+            if k < 0 {
+                return 0;
+            }
+            let mut sum = 0;
+            let mut h: HashSet<i32> = HashSet::new();
+            let mut r: HashSet<i32> = HashSet::new();
+
+            for i in 0..nums.len() {
+                if h.contains(&nums[i]) {
+                    r.insert(nums[i]);
+                } else {
+                    h.insert(nums[i]);
+                }
+            }
+
+            for v in h.iter() {
+                if h.contains(&(v + k)) {
+                    sum += 1;
+                }
+            }
+
+            if k == 0 {
+                return r.len() as i32;
+            }
+
+            sum
+        }
+
+        //leetcode 561
+        pub fn array_pair_sum(nums: Vec<i32>) -> i32 {
+            let mut nums = nums;
+            nums.sort();
+            let mut sum = 0;
+            nums.iter().enumerate().fold(0, |acc, (i, x)| {
+                if i & 1 == 1 {
+                    sum += acc.min(*x);
+                }
+                *x
+            });
+            sum
+        }
+
+        // leetcode 566
+        pub fn matrix_reshape(nums: Vec<Vec<i32>>, r: i32, c: i32) -> Vec<Vec<i32>> {
+            let mut ret: Vec<Vec<i32>> = Vec::new();
+            let mut ll: Vec<i32> = Vec::new();
+            for i in nums.iter() {
+                for j in i.iter() {
+                    ll.push(*j);
+                }
+            }
+
+            for rr in 0..r {
+                let mut col = Vec::new();
+                for cc in 0..c {
+                    if let Some(item) = ll.pop() {
+                        col.push(item)
+                    } else {
+                        return nums;
+                    }
+                }
+                col.reverse();
+                ret.push(col);
+            }
+            ret.reverse();
+            ret
+        }
+
+        //leetcode 581
+        pub fn find_unsorted_subarray(nums: Vec<i32>) -> i32 {
+            if nums.len() <= 1 {
+                return 0;
+            }
+
+            let mut sum = 0;
+            let mut nums2 = nums.clone();
+            nums2.sort();
+            let (mut l, mut r) = (0, 0);
+            for i in 0..nums.len() {
+                if nums[i] != nums2[i] {
+                    l = i;
+                    break;
+                }
+            }
+
+            for i in 0..nums.len() {
+                if nums[i] != nums2[i] {
+                    r = i;
+                }
+            }
+
+            sum = r as i32 - l as i32;
+            if sum <= 0 {
+                0
+            } else {
+                sum as i32 + 1
+            }
+        }
+
+        //leetcode 605
+        pub fn can_place_flowers(f: Vec<i32>, n: i32) -> bool {
+            let (mut sum, mut i) = (0, 0);
+            while i < f.len() {
+                if (i == 0 || f[i - 1] == 0) && f[i] == 0 && (i == f.len() - 1 || f[i + 1] == 0) {
+                    i += 2;
+                    sum += 1;
+                } else {
+                    i += 1;
+                }
+                if sum >= n {
+                    return true;
+                }
+            }
+            false
+        }
     }
+}
+
+#[test]
+fn test_can_place_flowers() {
+    assert_eq!(
+        code::Solution::can_place_flowers(vec![0, 0, 1, 0, 0], 1),
+        true
+    );
+    assert_eq!(
+        code::Solution::can_place_flowers(vec![0, 0, 1, 0, 1, 0, 0], 2),
+        true
+    );
+    assert_eq!(
+        code::Solution::can_place_flowers(vec![0, 0, 1, 0, 1], 1),
+        true
+    );
+    assert_eq!(
+        code::Solution::can_place_flowers(vec![1, 0, 0, 0, 1, 0, 1], 1),
+        true
+    );
+    assert_eq!(
+        code::Solution::can_place_flowers(vec![1, 0, 0, 0, 1], 1),
+        true
+    );
+    assert_eq!(
+        code::Solution::can_place_flowers(vec![1, 0, 0, 0, 0, 1], 2),
+        false
+    );
+    assert_eq!(
+        code::Solution::can_place_flowers(vec![1, 0, 0, 0, 0, 0, 1], 2),
+        true
+    );
+    assert_eq!(
+        code::Solution::can_place_flowers(vec![1, 0, 1, 0, 1, 0, 1], 0),
+        true
+    );
+}
+
+#[test]
+fn test_find_unsorted_subarray() {
+    assert_eq!(code::Solution::find_unsorted_subarray(vec![4, 2]), 2);
+    assert_eq!(
+        code::Solution::find_unsorted_subarray(vec![1, 2, 3, 3, 3]),
+        0
+    );
+    assert_eq!(
+        code::Solution::find_unsorted_subarray(vec![1, 1, 3, 2, 2, 2]),
+        4
+    );
+    assert_eq!(
+        code::Solution::find_unsorted_subarray(vec![1, 5, 5, 5, 7, 9, 3, 2, 2, 2]),
+        9
+    );
+    assert_eq!(code::Solution::find_unsorted_subarray(vec![1, 2, 3, 4]), 0);
+    assert_eq!(code::Solution::find_unsorted_subarray(vec![2, 10, 9]), 2);
+    assert_eq!(
+        code::Solution::find_unsorted_subarray(vec![2, 6, 4, 8, 10, 9, 15]),
+        5
+    );
+    assert_eq!(
+        code::Solution::find_unsorted_subarray(vec![2, 10, 9, 15]),
+        2
+    );
+    assert_eq!(code::Solution::find_unsorted_subarray(vec![2]), 0);
+}
+
+#[test]
+fn test_matrix_reshape() {
+    assert_eq!(
+        code::Solution::matrix_reshape(vec![vec![1, 2], vec![3, 4]], 1, 4),
+        vec![vec![1, 2, 3, 4]]
+    );
+    assert_eq!(
+        code::Solution::matrix_reshape(vec![vec![1, 2], vec![3, 4]], 2, 4),
+        vec![vec![1, 2], vec![3, 4]]
+    );
+}
+
+#[test]
+fn test_array_pair_sum() {
+    assert_eq!(code::Solution::array_pair_sum(vec![1, 3, 2, 4]), 4);
+    assert_eq!(code::Solution::array_pair_sum(vec![1, 3, 2, 4, -7, -8]), -4);
+}
+
+#[test]
+fn test_find_pairs() {
+    assert_eq!(
+        code::Solution::find_pairs(vec![3, 1, 4, 1, 5, 1, 3, 6], 2),
+        3
+    );
+    assert_eq!(code::Solution::find_pairs(vec![1, 2, 3, 4, 5], 1), 4);
+    assert_eq!(code::Solution::find_pairs(vec![1, 3, 1, 5, 4], 0), 1);
+}
+
+#[test]
+fn test_find_max_consecutive_ones() {
+    assert_eq!(
+        code::Solution::find_max_consecutive_ones(vec![1, 1, 0, 1, 1, 1]),
+        3
+    );
+}
+
+#[test]
+fn test_find_disappeared_numbers() {
+    assert_eq!(
+        code::Solution::find_disappeared_numbers(vec![1, 3, 3, 3, 5]),
+        vec![2, 4]
+    );
+    assert_eq!(
+        code::Solution::find_disappeared_numbers(vec![4, 3, 2, 7, 8, 2, 3, 1]),
+        vec![5, 6]
+    );
+    assert_eq!(
+        code::Solution::find_disappeared_numbers(vec![3, 2, 2, 3, 5, 1]),
+        vec![4, 6]
+    );
+    assert_eq!(
+        code::Solution::find_disappeared_numbers(vec![1, 1]),
+        vec![2]
+    );
+    assert_eq!(code::Solution::find_disappeared_numbers(vec![1, 2]), vec![]);
+}
+
+#[test]
+fn test_third_max() {
+    assert_eq!(code::Solution::third_max(vec![1, 2, 2, 5, 3, 5]), 2);
+    assert_eq!(code::Solution::third_max(vec![1, 1, 1, 1]), 1);
+    assert_eq!(code::Solution::third_max(vec![]), 0);
+    assert_eq!(code::Solution::third_max(vec![0]), 0);
+    assert_eq!(code::Solution::third_max(vec![1, 2]), 2);
+    assert_eq!(code::Solution::third_max(vec![3, 2, 1]), 1);
+    assert_eq!(code::Solution::third_max(vec![3, 2, 1]), 1);
+    assert_eq!(code::Solution::third_max(vec![2, 2, 3, 1]), 1);
 }
 
 #[test]

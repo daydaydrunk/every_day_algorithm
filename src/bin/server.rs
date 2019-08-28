@@ -1,13 +1,11 @@
 extern crate minigrep;
 
+use std::ops::Index;
+
 fn main() {
-    let mut y = 0;
-    let mut x = vec![1, 2, 3, 5, 6];
-    for i in 0..x.len() {
-        y ^= (i + 1) ^ x[i];
-        println!("{:?}", y);
-    }
-    println!("={:?}", y);
+    let mut y = vec![5, 6];
+    let mut x = vec![1, 2, 3];
+    println!("={:?}", y.get((-1.max(0))));
 }
 
 //EOF
