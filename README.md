@@ -1,1 +1,1 @@
-# practise leetcode algorithm
+# This project is used to practice LeetCode algorithms.
