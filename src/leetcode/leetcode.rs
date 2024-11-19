@@ -1,4 +1,4 @@
-use crate::leetcode::code::Solution;
+use crate::leetcode;
 use std::cmp::max;
 use std::convert::TryInto;
 pub mod code {
