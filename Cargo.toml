@@ -3,3 +3,6 @@ name = "every_day_algorithm"
 version = "0.0.0"
 authors = ["charlie <take3812@gmail.com>"]
 edition = "2021"
+
+[dependencies]
+rand = "0.8.5"
