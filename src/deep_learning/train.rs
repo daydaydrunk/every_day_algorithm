@@ -1,4 +1,4 @@
-use crate::neural::Neural;
+use crate::deep_learning::neural::Neural;
 
 fn main() {
     // 创建一个用于数字分类的神经网络 (输入:1, 隐藏:4, 输出:1)
