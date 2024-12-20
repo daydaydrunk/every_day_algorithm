@@ -1,65 +1,134 @@
 use std::cell::RefCell;
-use std::collections::LinkedList;
-use std::sync::{Arc, Mutex};
+use std::ptr::null_mut;
+use std::rc::Rc;
 
-type Node<T> = Option<Arc<Mutex<Box<ListNode<T>>>>>;
+type Link<T> = Option<Rc<RefCell<Node<T>>>>;
 
-pub struct List<T> {
-    head: Option<Box<ListNode<T>>>,
-    last: Option<Box<ListNode<T>>>,
-    len: u64,
+#[derive(Debug)]
+struct Node<T> {
+    value: T,
+    prev: Link<T>,
+    next: Link<T>,
 }
 
-#[derive(Debug, Clone, Default)]
-pub struct ListNode<T> {
-    index: u64,
-    val: T,
-    next: Option<Box<ListNode<T>>>,
-}
-
-impl<T> ListNode<T> {
-    fn new(index: u64, val: T) -> ListNode<T> {
-        ListNode {
-            index: index,
-            val: val,
+impl<T> Node<T> {
+    fn new(value: T) -> Rc<RefCell<Self>> {
+        Rc::new(RefCell::new(Node {
+            value,
+            prev: None,
             next: None,
-        }
+        }))
     }
 }
 
-impl<T> Iterator for List<T> {
-    type Item = T;
-
-    fn next(&mut self) -> Option<Self::Item> {}
+#[derive(Debug)]
+pub struct DoublyLinkedList<T> {
+    head: Link<T>,
+    tail: Link<T>,
+    length: usize,
 }
 
-impl<T> List<T> {
-    fn new() -> List<T> {
-        List {
+impl<T> DoublyLinkedList<T> {
+    pub fn new() -> Self {
+        DoublyLinkedList {
             head: None,
-            last: None,
-            len: 0,
+            tail: None,
+            length: 0,
         }
     }
 
-    fn insert(&mut self, v: T) {
-        let mut new_node = Some(Box::new(ListNode::new(self.len + 1, v)));
-        match self.head {
-            Some(mut h) => {}
+    pub fn append(&mut self, value: T) {
+        let new_node = Node::new(value);
+        match self.tail.take() {
+            Some(old_tail) => {
+                old_tail.borrow_mut().next = Some(new_node.clone());
+                new_node.borrow_mut().prev = Some(old_tail);
+                self.tail = Some(new_node);
+            }
             None => {
-                if let Some(mut l) = self.last {
-                    l.next = new_node;
-                    self.last = new_node;
-                }
-                self.head = Some(Box::new(new_node));
-                self.last = self.head.clone();
+                self.head = Some(new_node.clone());
+                self.tail = Some(new_node);
             }
         }
+        self.length += 1;
     }
 
-    fn search(&self, id: u64) {}
+    pub fn prepend(&mut self, value: T) {
+        let new_node = Node::new(value);
+        match self.head.take() {
+            Some(old_head) => {
+                old_head.borrow_mut().prev = Some(new_node.clone());
+                new_node.borrow_mut().next = Some(old_head);
+                self.head = Some(new_node);
+            }
+            None => {
+                self.head = Some(new_node.clone());
+                self.tail = Some(new_node);
+            }
+        }
+        self.length += 1;
+    }
 
-    fn del(&mut self, id: u64) {}
+    pub fn pop_front(&mut self) -> Option<T> {
+        self.head.take().map(|old_head| {
+            match old_head.borrow_mut().next.take() {
+                Some(new_head) => {
+                    new_head.borrow_mut().prev.take();
+                    self.head = Some(new_head);
+                }
+                None => {
+                    self.tail.take();
+                }
+            }
+            self.length -= 1;
+            Rc::try_unwrap(old_head).ok().unwrap().into_inner().value
+        })
+    }
+
+    pub fn pop_back(&mut self) -> Option<T> {
+        self.tail.take().map(|old_tail| {
+            match old_tail.borrow_mut().prev.take() {
+                Some(new_tail) => {
+                    new_tail.borrow_mut().next.take();
+                    self.tail = Some(new_tail);
+                }
+                None => {
+                    self.head.take();
+                }
+            }
+            self.length -= 1;
+            Rc::try_unwrap(old_tail).ok().unwrap().into_inner().value
+        })
+    }
+
+    pub fn len(&self) -> usize {
+        self.length
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.length == 0
+    }
 }
 
-//EOF
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_doubly_linked_list() {
+        let mut list = DoublyLinkedList::new();
+        assert_eq!(list.len(), 0);
+        assert!(list.is_empty());
+
+        list.append(1);
+        list.append(2);
+        list.append(3);
+        assert_eq!(list.len(), 3);
+        assert!(!list.is_empty());
+
+        assert_eq!(list.pop_front(), Some(1));
+        assert_eq!(list.pop_back(), Some(3));
+        assert_eq!(list.pop_front(), Some(2));
+        assert_eq!(list.pop_front(), None);
+    }
+}
