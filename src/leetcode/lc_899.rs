@@ -1,13 +1,13 @@
 struct Solution {}
 
 impl Solution {
-    pub fn orderly_queue(s: String, k: i32) -> String {
+    pub fn orderly_queue(mut s: String, k: i32) -> String {
         if k == 1 {
             let mut smallest = s.clone();
-            let mut s = s + &s; // Concatenate string with itself
+            s.push_str(s.clone().as_str()); // Concatenate string with itself
             for i in 1..smallest.len() {
                 let rotation = &s[i..i + smallest.len()];
-                if rotation < smallest {
+                if rotation < &smallest {
                     smallest = rotation.to_string();
                 }
             }
