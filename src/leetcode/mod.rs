@@ -1,3 +1,4 @@
+mod lc_800;
 mod lc_865;
 mod lc_881;
 mod lc_882;
