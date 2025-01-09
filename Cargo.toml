@@ -11,6 +11,7 @@ sdl2 = { version = "0.37", features = [
     "static-link",
     "gfx",
     "image",
+    "ttf",
 ] }
 cpal = "0.15"
 ringbuf = { version = "0.3", features = ["default"] }

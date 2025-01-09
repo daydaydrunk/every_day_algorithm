@@ -4,6 +4,8 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::Canvas;
+use sdl2::render::TextureQuery;
+use sdl2::ttf::{self, Font};
 use sdl2::video::Window;
 use std::time::Duration;
 
@@ -101,6 +103,7 @@ fn main() -> Result<(), String> {
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
     let audio_subsystem = sdl_context.audio()?;
+    let ttf_context = ttf::init().map_err(|e| e.to_string())?;
 
     let window = video_subsystem
         .window("CRT Oscilloscope", WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -132,6 +135,10 @@ fn main() -> Result<(), String> {
     device.resume();
 
     let mut event_pump = sdl_context.event_pump()?;
+
+    // Load a font
+    let font_path = "AmericanTypewriter.ttf";
+    let font = ttf_context.load_font(font_path, 128)?;
 
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -179,6 +186,30 @@ fn main() -> Result<(), String> {
         canvas.set_draw_color(Color::RGBA(0, 30, 0, 3));
         canvas.fill_rect(None)?;
         canvas.set_blend_mode(sdl2::render::BlendMode::None);
+
+        // Create a texture for the text
+        let surface = font
+            .render("OCS")
+            .blended(Color::RGBA(255, 255, 255, 255))
+            .map_err(|e| e.to_string())?;
+        let texture_creator = canvas.texture_creator();
+        let texture = texture_creator
+            .create_texture_from_surface(&surface)
+            .map_err(|e| e.to_string())?;
+
+        // Get the texture query to determine the size of the text
+        let TextureQuery { width, height, .. } = texture.query();
+
+        // Define the position for the text (near the bottom of the window)
+        let target = Rect::new(
+            (WINDOW_WIDTH / 2 - width / 2) as i32,
+            (WINDOW_HEIGHT - height - 20) as i32,
+            width,
+            height,
+        );
+
+        // Render the text
+        canvas.copy(&texture, None, Some(target))?;
 
         canvas.present();
         std::thread::sleep(Duration::from_millis(16));
