@@ -1,3 +1,4 @@
+mod lc_796;
 mod lc_797;
 mod lc_798;
 mod lc_799;
