@@ -1,3 +1,4 @@
+mod lc_794;
 mod lc_795;
 mod lc_796;
 mod lc_797;
@@ -23,5 +24,4 @@ mod lc_996;
 mod lc_997;
 mod lc_998;
 mod lc_999;
-
 pub mod leetcode;
