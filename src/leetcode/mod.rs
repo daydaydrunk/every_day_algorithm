@@ -1,4 +1,5 @@
 mod lc_743;
+mod lc_792;
 mod lc_793;
 mod lc_794;
 mod lc_795;
